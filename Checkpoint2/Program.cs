@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Globalization;
 
 namespace WCS
 {
@@ -51,8 +52,12 @@ namespace WCS
                  Console.WriteLine(item);
              }*/
 
-            int startDate = 20200529;
-            int endDate = 20200530;
+            string date = "20200529";
+            string date2 = "20200530";
+
+
+            DateTime startDate = DateTime.ParseExact(date, "yyyyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.None);
+            DateTime endDate = DateTime.ParseExact(date2, "yyyyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.None);
             int person = 3;
 
             Database.GetInstance().GetEventFromPerson(person, startDate, endDate);

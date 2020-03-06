@@ -29,12 +29,16 @@ namespace WCS
             return singleton;
         }
 
-        public void GetEventFromPerson(int personId, int startDate, int endDate)
+        public void GetEventFromPerson(int personId, DateTime startDate, DateTime endDate)
         {
             SqlCommand command = new SqlCommand("sp_GetAllEventFromUserByDate", Connection);
             command.CommandType = CommandType.StoredProcedure;
 
-            /*SqlParameter PersonId = command.Parameters.Add("@PersonId", SqlDbType.Int, personId);
+            command.Parameters.Add(new SqlParameter("@PersonId", SqlDbType.Int)).Value = personId;
+            command.Parameters.Add(new SqlParameter("@StartDate", SqlDbType.Date)).Value = startDate;
+            command.Parameters.Add(new SqlParameter("@EndDate", SqlDbType.Date)).Value = endDate;
+/*
+            SqlParameter PersonId = command.Parameters.Add("@PersonId", SqlDbType.Int, personId);
             PersonId.Direction = ParameterDirection.Input;
             SqlParameter StartDate = command.Parameters.Add("@StartDate", SqlDbType.Date, startDate);
             StartDate.Direction = ParameterDirection.Input;
@@ -44,7 +48,7 @@ namespace WCS
             SqlDataReader reader = command.ExecuteReader();
             while (reader.Read())
             {
-                Console.WriteLine(reader.GetString(1));
+                Console.WriteLine("event" + reader.GetString(1));
             }
             reader.Close();
 
