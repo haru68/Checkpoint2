@@ -4,7 +4,7 @@ using System.Text;
 
 namespace WCS
 {
-    class Adress
+    public class Adress
     {
         public int StreetNumber { get; private set; }
         public string StreetName { get; private set; }

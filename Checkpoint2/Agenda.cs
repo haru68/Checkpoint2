@@ -4,7 +4,7 @@ using System.Text;
 
 namespace WCS
 {
-    class Agenda
+    public class Agenda
     {
         public List<Event> EventList { get; set; }
 

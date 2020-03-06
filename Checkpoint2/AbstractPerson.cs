@@ -4,14 +4,14 @@ using System.Text;
 
 namespace WCS
 {
-    class AbstractPerson
+    public abstract class AbstractPerson
     {
-        public string FirstName { get; private set; }
-        public string LastName { get; private set; }
-        public DateTime Birthday { get; private set; }
-        public Adress LivingLocation { get; private set; }
-        public string Email { get; private set; }
-        public Agenda Agenda {get; private set;}
+        public string FirstName { get; protected set; }
+        public string LastName { get; protected set; }
+        public DateTime Birthday { get; protected set; }
+        public Adress LivingLocation { get; protected set; }
+        public string Email { get; protected set; }
+        public Agenda Agenda {get; protected set;}
 
 
         public AbstractPerson(string firstName, string lastName, DateTime birthday, Adress adress, string email, Agenda agenda)
@@ -23,5 +23,6 @@ namespace WCS
             Email = email;
             Agenda = agenda;
         }
+        
     }
 }
