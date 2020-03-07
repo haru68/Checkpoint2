@@ -4,18 +4,20 @@ using System.Text;
 
 namespace WCS
 {
-    class Cursus
+    public class Cursus
     {
         public Calendar CursusCalendar { get; private set; }
         public string Name { get; private set; }
-        public Event Dates { get; private set; }
+        public DateTime StartDate { get; private set; }
+        public DateTime EndDate { get; private set; }
         public List<Expedition> Expeditions { get; private set; }
 
-        public Cursus(Calendar calendar, string name, Event dates, List<Expedition> expeditions)
+        public Cursus(Calendar calendar, string name, DateTime startDate, DateTime date, List<Expedition> expeditions)
         {
             CursusCalendar = calendar;
             Name = name;
-            Dates = dates;
+            StartDate = startDate;
+            EndDate = EndDate;
             Expeditions = expeditions;
         }
     }

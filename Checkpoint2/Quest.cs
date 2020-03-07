@@ -4,7 +4,7 @@ using System.Text;
 
 namespace WCS
 {
-    class Quest
+    public class Quest
     {
         public string Title { get; private set; }
         public string Text { get; private set; }

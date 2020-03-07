@@ -34,11 +34,20 @@ GO
 -------------------
 -- Tables creation
 -------------------
+CREATE TABLE Calendar (
+id INT PRIMARY KEY IDENTITY(1,1),
+"Name" VARCHAR (50),
+"Description" TEXT
+)
+GO
+
 CREATE TABLE Cursus (
 id INT PRIMARY KEY IDENTITY(1,1),
 "Name" VARCHAR (80) NOT NULL,
-StartDate DATETIME NOT NULL,
-EndDate DATETIME NOT NULL
+StartDate DATE NOT NULL,
+EndDate DATE NOT NULL,
+FK_Calendar INT NOT NULL,
+FOREIGN KEY (FK_Calendar) REFERENCES Calendar(id)
 )
 GO
 
@@ -70,12 +79,6 @@ Country VARCHAR(80) NOT NULL
 )
 GO
 
-CREATE TABLE Calendar (
-id INT PRIMARY KEY IDENTITY(1,1),
-"Name" VARCHAR (50),
-"Description" TEXT
-)
-GO
 
 CREATE TABLE Agenda(
 id INT PRIMARY KEY IDENTITY(1,1),
@@ -106,17 +109,52 @@ FOREIGN KEY (FK_LeadingTrainer) REFERENCES Person(id)
 )
 GO
 
+
+-------------------
+-- Calendar creation
+-------------------
+
+DECLARE @CounterCalendar INT = 0
+WHILE (@CounterCalendar < 5)
+BEGIN
+	INSERT INTO Calendar ("Name", "Description")
+	VALUES
+	(CONCAT('Calendrier ',@CounterCalendar),'Je suis un calendrier bien rempli')
+	SET @CounterCalendar = @CounterCalendar + 1
+END
+GO
+
+-------------------
+-- Agenda creation
+-------------------
+
+DECLARE @CounterCalendar INT = 1
+DECLARE @CounterAgenda INT = 0
+WHILE(@CounterCalendar <= 5)
+BEGIN
+	WHILE (@CounterAgenda < 10)
+	BEGIN
+		INSERT INTO Agenda (FK_Calendar, "Description", StartTime, EndTime)
+		VALUES
+		(@CounterCalendar, 'Je suis un évenement dans un agenda', '2020-29-05', '2020-30-05')
+		SET @CounterAgenda = @CounterAgenda + 1
+	END
+	SET @CounterAgenda = 0
+	SET @CounterCalendar = @CounterCalendar + 1
+END
+GO
+
 ------------------
 -- Cursus creation
 ------------------
 
 
-DECLARE @CounterCursus INT = 0
-WHILE (@CounterCursus < 5)
+DECLARE @CounterCursus INT = 1
+WHILE (@CounterCursus <= 5)
 BEGIN
-	INSERT INTO Cursus ("Name", StartDate, EndDate)
+	INSERT INTO Cursus ("Name", StartDate, EndDate, FK_Calendar)
 	VALUES
-	(CONCAT('Cursus ', @CounterCursus), '2019-12-08', '2020-08-08')
+	(CONCAT('Cursus ', @CounterCursus), '2019-12-08', '2020-08-08', @CounterCursus)
 	SET @CounterCursus = @CounterCursus + 1
 END
 GO
@@ -148,7 +186,7 @@ GO
 
 DECLARE @CounterQuest INT = 0
 DECLARE @CounterExpedition INT = 1
-WHILE (@CounterQuest < 20)
+WHILE (@CounterQuest < 200)
 BEGIN
 	WHILE(@CounterExpedition <= 50)
 	BEGIN
@@ -156,9 +194,9 @@ BEGIN
 		VALUES
 		(CONCAT('Quest', @CounterQuest), 'Ceci est une superbe quête rédigée par un très bon formateur', @CounterExpedition)
 		SET @CounterExpedition = @CounterExpedition +1
+		SET @CounterQuest = @CounterQuest + 1
 	END
 	SET @CounterExpedition = 1
-	SET @CounterQuest = @CounterQuest + 1
 END
 GO
 
@@ -175,35 +213,6 @@ BEGIN
 	SET @CounterPerson = @CounterPerson + 1
 END
 
-DECLARE @CounterCalendar INT = 0
-WHILE (@CounterCalendar < 5)
-BEGIN
-	INSERT INTO Calendar ("Name", "Description")
-	VALUES
-	(CONCAT('Calendrier ',@CounterCalendar),'Je suis un calendrier bien rempli')
-	SET @CounterCalendar = @CounterCalendar + 1
-END
-GO
-
--------------------
--- Agenda creation
--------------------
-
-DECLARE @CounterCalendar INT = 1
-DECLARE @CounterAgenda INT = 0
-WHILE(@CounterCalendar <= 5)
-BEGIN
-	WHILE (@CounterAgenda < 10)
-	BEGIN
-		INSERT INTO Agenda (FK_Calendar, "Description", StartTime, EndTime)
-		VALUES
-		(@CounterCalendar, 'Je suis un évenement dans un agenda', '2020-05-03', '2020-05-04')
-		SET @CounterAgenda = @CounterAgenda + 1
-	END
-	SET @CounterAgenda = 0
-	SET @CounterCalendar = @CounterCalendar + 1
-END
-GO
 
 
 --------------------

@@ -8,7 +8,7 @@ namespace WCS
     {
         public Cursus FollowedCurses { get; set; }
 
-        public Student(string firstName, string lastName, DateTime birthday, Adress adress, string email, Agenda agenda, Cursus followedCursus) : base (firstName, lastName, birthday, adress, email, agenda)
+        public Student(int personId, string firstName, string lastName, DateTime birthday, Adress adress, string email, Agenda agenda, Cursus followedCursus) : base (personId, firstName, lastName, birthday, adress, email, agenda)
         {
             FollowedCurses = followedCursus;
         }

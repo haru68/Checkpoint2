@@ -6,6 +6,7 @@ namespace WCS
 {
     public abstract class AbstractPerson
     {
+        public int PersonId { get; private set; }
         public string FirstName { get; protected set; }
         public string LastName { get; protected set; }
         public DateTime Birthday { get; protected set; }
@@ -14,8 +15,9 @@ namespace WCS
         public Agenda Agenda {get; protected set;}
 
 
-        public AbstractPerson(string firstName, string lastName, DateTime birthday, Adress adress, string email, Agenda agenda)
+        public AbstractPerson(int personId, string firstName, string lastName, DateTime birthday, Adress adress, string email, Agenda agenda)
         {
+            PersonId = personId;
             FirstName = firstName;
             LastName = lastName;
             Birthday = birthday;

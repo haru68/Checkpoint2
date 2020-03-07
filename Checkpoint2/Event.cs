@@ -6,11 +6,13 @@ namespace WCS
     {
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
-        public string Description { get; set; }
+        public string Description { get; private set; }
 
-        public Event(String description)
+        public Event(String description, DateTime startTime, DateTime endTime)
         {
             Description = description;
+            StartTime = startTime;
+            EndTime = endTime;
         }
 
         public void Postpone(TimeSpan timeDelta)

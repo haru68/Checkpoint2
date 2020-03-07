@@ -9,58 +9,44 @@ namespace WCS
     {
         public static void Main()
         {
-            /*Event newEvent = new Event("Important meeting");
+            Event newEvent = new Event("Important meeting", DateTime.Now, DateTime.Now);
             newEvent.StartTime = DateTime.Now;
             newEvent.EndTime = DateTime.Now + TimeSpan.FromHours(1);
             newEvent.Postpone(TimeSpan.FromHours(1));
             Console.WriteLine("Another meeting is postponed");
 
 
-            string firstName = "toto";
-            string lastName = "Priori";
-            DateTime birthday = DateTime.Today;
-            Adress adress = new Adress(3, "street", "city", "France");
-            string email = "coucou@couou";
 
-            Event event1 = new Event("event1");
-            List<Event> events = new List<Event>();
-            Agenda agenda = new Agenda(events);
-            List<Agenda> agendas = new List<Agenda>();
-            agendas.Add(agenda);
-            Calendar calendar = new Calendar(agendas);
-
-            Quest quest = new Quest("Title1", "text");
-            List<Quest> quests = new List<Quest>();
-            quests.Add(quest);
-            Expedition expedition = new Expedition("Expedition1", quests, event1);
-            List<Expedition> expeditions = new List<Expedition>();
-            expeditions.Add(expedition);
-
-            Cursus cursus = new Cursus(calendar, "cursus1", event1, expeditions);
-
-            PersonFactory.Create(firstName, lastName, birthday, adress, email, agenda);
-*/
-
-            /*DateTime startDate = new DateTime(2020, 05, 29);
-            DateTime endDate = new DateTime(2020, 05, 30);
-
-            *//* List<string> liste = new List<string>();
-             liste = Database.GetInstance().GetAllFromDB();
-
-             foreach(string item in liste)
-             {
-                 Console.WriteLine(item);
-             }*/
-
+            // Affiche tous les événements d'une personne
             string date = "20200529";
             string date2 = "20200530";
 
 
             DateTime startDate = DateTime.ParseExact(date, "yyyyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.None);
             DateTime endDate = DateTime.ParseExact(date2, "yyyyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.None);
-            int person = 3;
+            int personId = 3;
 
-            Database.GetInstance().GetEventFromPerson(person, startDate, endDate);
+            Database.GetInstance().GetEventFromPerson(personId, startDate, endDate);
+
+
+            // Affiche toutes les quêtes d'un cursus
+            string cursusName = "Cursus 1";
+            List<Quest> quests = Database.GetInstance().GetQuestFromCursus(cursusName);
+
+            Console.Write("Quest title \t Quest text");
+            foreach(Quest quest in quests)
+            {
+                Console.WriteLine();
+                Console.Write(quest.Title + "\t");
+                Console.Write(quest.Text);
+            }
+
+
+            /*
+            Console.WriteLine();
+            Console.WriteLine("Get all students from a cursus");
+            string cursusName = "Cursus 1";
+            Database.GetInstance().GetStudentsFromCursus(cursusName);*/
             
         }
     }
