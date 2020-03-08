@@ -34,6 +34,24 @@ GO
 -------------------
 -- Tables creation
 -------------------
+
+CREATE TABLE Adress(
+id INT PRIMARY KEY IDENTITY(1,1),
+StreetNumber INT NOT NULL,
+StreetName VARCHAR(150) NOT NULL,
+CityName VARCHAR(100) NOT NULL,
+Country VARCHAR(80) NOT NULL
+)
+GO
+
+CREATE TABLE Campus (
+id INT PRIMARY KEY IDENTITY(1,1),
+"Name" VARCHAR (50),
+FK_Adress INT,
+FOREIGN KEY (FK_Adress) REFERENCES Adress(id)
+)
+GO
+
 CREATE TABLE Calendar (
 id INT PRIMARY KEY IDENTITY(1,1),
 "Name" VARCHAR (50),
@@ -47,7 +65,9 @@ id INT PRIMARY KEY IDENTITY(1,1),
 StartDate DATE NOT NULL,
 EndDate DATE NOT NULL,
 FK_Calendar INT NOT NULL,
-FOREIGN KEY (FK_Calendar) REFERENCES Calendar(id)
+FOREIGN KEY (FK_Calendar) REFERENCES Calendar(id),
+FK_Campus INT NOT NULL,
+FOREIGN KEY (FK_Campus) REFERENCES Campus(id)
 )
 GO
 
@@ -66,16 +86,6 @@ id INT PRIMARY KEY IDENTITY(1,1),
 "Text" Text NOT NULL,
 FK_Expedition INT,
 FOREIGN KEY (FK_Expedition) REFERENCES Expeditions(id)
-)
-GO
-
-
-CREATE TABLE Adress(
-id INT PRIMARY KEY IDENTITY(1,1),
-StreetNumber INT NOT NULL,
-StreetName VARCHAR(150) NOT NULL,
-CityName VARCHAR(100) NOT NULL,
-Country VARCHAR(80) NOT NULL
 )
 GO
 
@@ -100,14 +110,38 @@ FOREIGN KEY (FK_Adress) REFERENCES Adress(id),
 Email VARCHAR(80) NOT NULL,
 FK_Cursus INT,
 FOREIGN KEY (FK_Cursus) REFERENCES Cursus(id),
-FK_Calendar INT,
-FOREIGN KEY (FK_Calendar) REFERENCES Calendar(id),
 FK_Trainer INT,
 FOREIGN KEY (FK_Trainer) REFERENCES Person(id),
 FK_LeadingTrainer INT,
 FOREIGN KEY (FK_LeadingTrainer) REFERENCES Person(id)
 )
 GO
+
+-------------------
+-- Adress creation
+-------------------
+
+DECLARE @CounterAdress INT = 0
+WHILE (@CounterAdress < 100)
+BEGIN
+	INSERT INTO Adress (StreetNumber, StreetName, CityName, Country)
+	VALUES
+	(@CounterAdress, 'Street', CONCAT('City ', @CounterAdress), 'France')
+	SET @CounterAdress = @CounterAdress + 1
+END
+
+-------------------
+-- Campus creation
+-------------------
+
+DECLARE @CounterCampus INT = 1
+WHILE (@CounterCampus <= 3)
+BEGIN
+	INSERT INTO Campus ("Name", FK_Adress)
+	VALUES
+	(CONCAT('Campus', @CounterCampus), @CounterCampus)
+	SET @CounterCampus = @CounterCampus + 1
+END
 
 
 -------------------
@@ -127,57 +161,78 @@ GO
 -------------------
 -- Agenda creation
 -------------------
-
-DECLARE @CounterCalendar INT = 1
-DECLARE @CounterAgenda INT = 0
-WHILE(@CounterCalendar <= 5)
+DECLARE @CursorCalendar INT
+DECLARE Cursor_Calendar Cursor SCROLL FOR
+	SELECT id FROM Calendar
+OPEN Cursor_Calendar
+FETCH FIRST FROM Cursor_Calendar INTO @CursorCalendar
+WHILE @@FETCH_STATUS = 0
 BEGIN
-	WHILE (@CounterAgenda < 10)
+	DECLARE @CounterAgenda INT = 1
+	WHILE (@CounterAgenda <= 10)
 	BEGIN
 		INSERT INTO Agenda (FK_Calendar, "Description", StartTime, EndTime)
 		VALUES
-		(@CounterCalendar, 'Je suis un évenement dans un agenda', '2020-29-05', '2020-30-05')
+		(@CursorCalendar, CONCAT('Event dans agenda', @CursorCalendar, 't', @CounterAgenda), '2020-29-05', '2020-30-05')
 		SET @CounterAgenda = @CounterAgenda + 1
 	END
 	SET @CounterAgenda = 0
-	SET @CounterCalendar = @CounterCalendar + 1
+	FETCH NEXT FROM Cursor_Calendar INTO @CursorCalendar
 END
+CLOSE Cursor_Calendar
+DEALLOCATE Cursor_Calendar
 GO
 
 ------------------
 -- Cursus creation
 ------------------
 
-
-DECLARE @CounterCursus INT = 1
-WHILE (@CounterCursus <= 5)
+DECLARE @CursorCampus INT
+DECLARE Cursor_Campus CURSOR SCROLL FOR
+	SELECT id FROM Campus
+OPEN Cursor_Campus
+FETCH FIRST FROM Cursor_Campus INTO @CursorCampus
+WHILE @@FETCH_STATUS = 0
 BEGIN
-	INSERT INTO Cursus ("Name", StartDate, EndDate, FK_Calendar)
-	VALUES
-	(CONCAT('Cursus ', @CounterCursus), '2019-12-08', '2020-08-08', @CounterCursus)
-	SET @CounterCursus = @CounterCursus + 1
+	DECLARE @CounterCursus INT = 1
+	WHILE (@CounterCursus <= 3)
+	BEGIN
+		INSERT INTO Cursus ("Name", StartDate, EndDate, FK_Calendar, FK_Campus)
+		VALUES
+		(CONCAT('Cursus ', @CounterCursus), '2019-12-08', '2020-08-08', @CounterCursus, @CursorCampus)
+		SET @CounterCursus = @CounterCursus + 1
+	END
+	FETCH NEXT FROM Cursor_Campus INTO @CursorCampus
 END
+CLOSE Cursor_Campus
+DEALLOCATE Cursor_Campus
 GO
-
 
 ----------------------
 -- Expedition creation
 ----------------------
 
-DECLARE @CounterCursus INT = 1
-DECLARE @CounterExpeditions INT = 0
-WHILE (@CounterCursus <= 5)
+DECLARE @CursorCursus INT
+DECLARE Cursor_Cursus CURSOR SCROLL FOR
+	SELECT id FROM Cursus
+OPEN Cursor_Cursus
+FETCH FIRST FROM Cursor_Cursus INTO @CursorCursus
+WHILE @@FETCH_STATUS = 0
 BEGIN
-		WHILE (@CounterExpeditions < 10)
+		DECLARE @CounterExpeditions INT = 1
+		WHILE (@CounterExpeditions <= 5)
 		BEGIN
-		INSERT INTO Expeditions ("name", FK_Cursus)
-		VALUES
-		(CONCAT('Expedition ', @CounterExpeditions), @CounterCursus)
-		SET @CounterExpeditions = @CounterExpeditions + 1
-	END
-	SET @CounterCursus = @CounterCursus + 1
-	SET @CounterExpeditions = 0
+			INSERT INTO Expeditions ("name", FK_Cursus)
+			VALUES
+			(CONCAT('Expedition ', @CounterExpeditions), @CursorCursus)
+			SET @CounterExpeditions = @CounterExpeditions + 1
+		END
+		SET @CounterExpeditions = 0
+		
+	FETCH NEXT FROM Cursor_Cursus INTO @CursorCursus
 END
+CLOSE Cursor_Cursus
+DEALLOCATE Cursor_Cursus
 GO
 
 ------------------
@@ -185,93 +240,82 @@ GO
 ------------------
 
 DECLARE @CounterQuest INT = 0
-DECLARE @CounterExpedition INT = 1
-WHILE (@CounterQuest < 200)
+DECLARE @CursorExpedition INT
+DECLARE Cursor_Expedition CURSOR SCROLL FOR
+	SELECT id FROM Expeditions
+OPEN Cursor_Expedition
+FETCH FIRST FROM Cursor_Expedition INTO @CursorExpedition
+WHILE @@FETCH_STATUS = 0
 BEGIN
-	WHILE(@CounterExpedition <= 50)
+	WHILE (@CounterQuest < 30)
 	BEGIN
-		INSERT INTO Quests ("Name", "Text", FK_Expedition)
-		VALUES
-		(CONCAT('Quest', @CounterQuest), 'Ceci est une superbe quête rédigée par un très bon formateur', @CounterExpedition)
-		SET @CounterExpedition = @CounterExpedition +1
-		SET @CounterQuest = @CounterQuest + 1
+			INSERT INTO Quests ("Name", "Text", FK_Expedition)
+			VALUES
+			(CONCAT('Quest', @CursorExpedition, 't', @CounterQuest), 'Ceci est une superbe quête rédigée par un très bon formateur', @CursorExpedition)
+			SET @CounterQuest = @CounterQuest + 1
 	END
-	SET @CounterExpedition = 1
+	SET @CounterQuest = 0
+	FETCH NEXT FROM Cursor_Expedition INTO @CursorExpedition
 END
+CLOSE Cursor_Expedition
+DEALLOCATE Cursor_Expedition
 GO
-
--------------------
--- Adress creation
--------------------
-
-DECLARE @CounterPerson INT = 0
-WHILE (@CounterPerson < 95)
-BEGIN
-	INSERT INTO Adress (StreetNumber, StreetName, CityName, Country)
-	VALUES
-	(@CounterPerson, 'Street', CONCAT('City ', @CounterPerson), 'France')
-	SET @CounterPerson = @CounterPerson + 1
-END
-
-
 
 --------------------
 -- Person Creation
 --------------------
 
-DECLARE @CounterLeadingTrainer INT = 0
-DECLARE @CounterCalendar INT = 1
-WHILE (@CounterLeadingTrainer < 5)
+--Leading Trainer
+DECLARE @CursorCursus INT
+DECLARE Cursor_Cursus CURSOR SCROLL FOR
+	SELECT id FROM Cursus
+OPEN Cursor_Cursus
+FETCH FIRST FROM Cursor_Cursus INTO @CursorCursus
+WHILE @@FETCH_STATUS = 0
 BEGIN
-	INSERT INTO Person ("FirstName", LastName, Birthday, FK_Adress, Email, FK_Calendar)
-	VALUES
-	('Leading Formateur', 'NOM', '1800-01-1', (@CounterLeadingTrainer+1), 'leadingTrainer@mail', @CounterCalendar)
-	SET @CounterLeadingTrainer = @CounterLeadingTrainer + 1
-	SET @CounterCalendar = @CounterCalendar + 1
-	IF (@CounterCalendar > 2)
+	DECLARE @CounterLeadingTrainer INT = 1
+	WHILE (@CounterLeadingTrainer <= 3)
 	BEGIN
-		SET @CounterCalendar = 1
+		INSERT INTO Person ("FirstName", LastName, Birthday, FK_Adress, Email, FK_Cursus)
+		VALUES
+		('Leading Formateur', CONCAT('Number', @CursorCursus), '1800-01-1', (@CounterLeadingTrainer+1), 'leadingTrainer@mail', @CursorCursus)
+		SET @CounterLeadingTrainer = @CounterLeadingTrainer + 1
 	END
+	SET @CounterLeadingTrainer = 0
+	FETCH NEXT FROM Cursor_Cursus
 END
+CLOSE Cursor_Cursus
+DEALLOCATE Cursor_Cursus
 GO
 
-
-DECLARE @CounterTrainer INT = 0
+-- Trainer
+DECLARE @CounterTrainer INT = 1
 DECLARE @CursorLeadingTrainer INT
 DECLARE @CounterAdress INT = 6
 DECLARE @TotalAdress INT = (SELECT COUNT(id) FROM Adress)
-DECLARE @CounterCursus INT =1
 DECLARE @TotalCursus INT = (SELECT COUNT(id) FROM Cursus)
-DECLARE @CounterCalendar INT = 1
 
 DECLARE Cursor_LeadingTrainer CURSOR SCROLL FOR
-	SELECT id FROM Person WHERE (FK_Trainer IS NULL) AND (FK_LeadingTrainer IS NULL)
-OPEN Cursor_LeadingTrainer
+		SELECT id FROM Person WHERE (FK_Trainer IS NULL) AND (FK_LeadingTrainer IS NULL)
+	OPEN Cursor_LeadingTrainer
+
+
+DECLARE @FK_CursusFromLeadingTrainer INT
+	
 FETCH FIRST FROM Cursor_LeadingTrainer INTO @CursorLeadingTrainer
 WHILE @@FETCH_STATUS = 0
 BEGIN
-	WHILE (@CounterTrainer < 4)
+	WHILE (@CounterTrainer <= 3)
 	BEGIN
-		INSERT INTO Person (FirstName, LastName, Birthday, FK_Adress, Email, FK_Cursus, FK_Calendar, FK_LeadingTrainer)
+		SET @FK_CursusFromLeadingTrainer = (SELECT FK_Cursus FROM Person WHERE Person.id = @CursorLeadingTrainer)
+		INSERT INTO Person (FirstName, LastName, Birthday, FK_Adress, Email, FK_Cursus, FK_LeadingTrainer)
 		VALUES
-		('Trainer', 'NOM', '1915-05-01', @CounterAdress, 'formateur@mail', @CounterCursus, @CounterCalendar, @CursorLeadingTrainer)
+		('Trainer', CONCAT('Number', @CursorLeadingTrainer), '1915-05-01', @CounterAdress, 'formateur@mail', @FK_CursusFromLeadingTrainer, @CursorLeadingTrainer)
 
 		SET @CounterAdress = @CounterAdress + 1
 		IF (@CounterAdress > @TotalAdress)
 		BEGIN
 			SET @CounterAdress = 1
-		END
-
-		SET @CounterCursus = @CounterCursus + 1
-		IF (@CounterCursus > @TotalCursus)
-		BEGIN
-			SET @CounterCursus = 1
-		END
-
-		SET @CounterCalendar = @CounterCalendar + 1
-		IF (@CounterCalendar > 4)
-		BEGIN
-			SET @CounterCalendar = 1
 		END
 
 		SET @CounterTrainer = @CounterTrainer + 1
@@ -288,9 +332,8 @@ DECLARE @CounterStudent INT = 0
 DECLARE @CursorTrainer INT
 DECLARE @CounterAdress INT = 1
 DECLARE @TotalAdress INT = (SELECT COUNT(id) FROM Adress)
-DECLARE @CounterCursus INT =1
+DECLARE @CounterCursus INT = 1
 DECLARE @TotalCursus INT = (SELECT COUNT(id) FROM Cursus)
-DECLARE @CounterCalendar INT = 4
 
 DECLARE Cursor_Trainer CURSOR SCROLL FOR
 	SELECT id FROM Person WHERE (FK_LeadingTrainer IS NOT NULL)
@@ -301,28 +344,16 @@ WHILE @@FETCH_STATUS = 0
 BEGIN
 	WHILE(@CounterStudent < 10)
 	BEGIN
-		--PRINT @CursorTrainer
-		INSERT INTO Person (FirstName, LastName, Birthday, FK_Adress, Email, FK_Cursus, FK_Calendar, FK_Trainer)
+		SET @CounterCursus = (SELECT FK_Cursus FROM Person WHERE id = @CursorTrainer)
+		INSERT INTO Person (FirstName, LastName, Birthday, FK_Adress, Email, FK_Cursus, FK_Trainer)
 		VALUES
-		('Student', 'NOM', '1980-05-05', @CounterAdress, 'student@mail', @CounterCursus, @CounterCalendar, @CursorTrainer)
+		('Student', CONCAT('Number', @CursorTrainer), '1980-05-05', @CounterAdress, 'student@mail', @CounterCursus, @CursorTrainer)
 		SET @CounterStudent = @CounterStudent + 1
 
 		SET @CounterAdress = @CounterAdress + 1
 		IF (@CounterAdress > @TotalAdress)
 		BEGIN
 			SET @CounterAdress = 1
-		END
-
-		SET @CounterCursus = @CounterCursus + 1
-		IF (@CounterCursus > @TotalCursus)
-		BEGIN
-			SET @CounterCursus = 1
-		END
-
-		SET @CounterCalendar = @CounterCalendar + 1
-		IF (@CounterCalendar > 5)
-		BEGIN
-			SET @CounterCalendar = 4
 		END
 	END
 	FETCH NEXT FROM Cursor_Trainer INTO @CursorTrainer

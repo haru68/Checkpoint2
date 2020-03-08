@@ -7,20 +7,20 @@ namespace WCS
     static class PersonFactory
     {
 
-        public static AbstractPerson Create(int personId, string firstName, string lastName, DateTime birthday, Adress adress, string email, Agenda agenda, Cursus cursus = null, List<Student> students = null, List<Trainer> trainers = null)
+        public static AbstractPerson Create(int personId, string firstName, string lastName, DateTime birthday, Adress adress, string email, Cursus cursus, List<Student> students = null, List<Trainer> trainers = null)
         {
             AbstractPerson person;
             if (students == null)
             {
-                person = new Student(personId, firstName, lastName, birthday, adress, email, agenda, cursus);
+                person = new Student(personId, firstName, lastName, birthday, adress, email, cursus);
             }
             else if (students != null)
             {
-                person = new Trainer(personId, firstName, lastName, birthday, adress, email, agenda, students, cursus);
+                person = new Trainer(personId, firstName, lastName, birthday, adress, email, students, cursus);
             }
             else if (trainers != null)
             {
-                person = new LeadingTrainer(personId, firstName, lastName, birthday, adress, email, agenda, trainers);
+                person = new LeadingTrainer(personId, firstName, lastName, birthday, adress, email, trainers, cursus);
             }
             else
             {

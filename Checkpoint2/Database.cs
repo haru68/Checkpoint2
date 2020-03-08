@@ -29,9 +29,120 @@ namespace WCS
             return singleton;
         }
 
-        public void GetEventFromPerson(int personId, DateTime startDate, DateTime endDate)
+        
+        public List<AbstractPerson> DisplayAllStudentsFromACursusId(int cursusId)
         {
-            SqlCommand command = new SqlCommand("sp_GetAllEventFromUserByDate", Connection);
+            List<AbstractPerson> studentsOfASameCursus = new List<AbstractPerson>();
+
+            SqlCommand cmd = new SqlCommand("sp_DisplayAllStudentsFromACursus", Connection);
+            cmd.CommandType = CommandType.StoredProcedure;
+
+            cmd.Parameters.Add("@CursusId", SqlDbType.VarChar).Value = cursusId;
+
+            Cursus cursus = Database.GetInstance().GetCursusFromId(cursusId);
+
+            SqlDataReader reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                int personId = reader.GetInt32(0);
+                string personFirstName = reader.GetString(1);
+                string personLastName = reader.GetString(2);
+                string personEmail = reader.GetString(3);
+                DateTime personBirthday = reader.GetDateTime(4);
+                int streetNumber = reader.GetInt32(5);
+                string streetName = reader.GetString(6);
+                string city = reader.GetString(7);
+                string country = reader.GetString(8);
+
+
+                Adress adress = new Adress(streetNumber, streetName, city, country);
+                AbstractPerson person = PersonFactory.Create(personId, personFirstName, personLastName, personBirthday, adress, personEmail, cursus);
+                studentsOfASameCursus.Add(person);
+            }
+            reader.Close();
+
+
+            return studentsOfASameCursus;
+        }
+
+        public Cursus GetCursusFromId(int cursusId)
+        {
+            SqlCommand cmd = new SqlCommand("sp_GetCursusFromId", Connection);
+            cmd.CommandType = CommandType.StoredProcedure;
+
+            cmd.Parameters.Add("@CursusId", SqlDbType.VarChar).Value = cursusId;
+            string name = "";
+            DateTime startDate = DateTime.Now;
+            DateTime endDate = DateTime.Now;
+            SqlDataReader reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                name = reader.GetString(0);
+                startDate = reader.GetDateTime(1);
+                endDate = reader.GetDateTime(2);
+
+            }
+            reader.Close();
+
+            List<Expedition> expeditions = Database.GetInstance().GetAllExpeditionsFromCursusId(cursusId);
+            Calendar calendar = Database.GetInstance().GetCalendarFromCursusId(cursusId);
+            Cursus cursus = new Cursus(calendar, name, startDate, endDate, expeditions);
+
+            return cursus;
+        }
+
+        public Calendar GetCalendarFromCursusId (int cursusId)
+        {
+            Agenda agenda = new Agenda(Database.GetInstance().GetAllEventsFromCursusId(cursusId));
+            List<Agenda> agendas = new List<Agenda>();
+            agendas.Add(agenda);
+
+            SqlCommand cmd = new SqlCommand("sp_GetAllCalendarFromCursusId", Connection);
+            cmd.CommandType = CommandType.StoredProcedure;
+
+            cmd.Parameters.Add("@CursusId", SqlDbType.VarChar).Value = cursusId;
+            string name = "";
+            string description = "";
+            SqlDataReader reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                name = reader.GetString(1);
+                description = reader.GetString(2);
+            }
+            reader.Close();
+
+            Calendar calendar = new Calendar(agendas, name, description);
+            return calendar;
+        }
+
+        public List<Event> GetAllEventsFromCursusId(int cursusId)
+        {
+            List<Event> events = new List<Event>();
+
+            SqlCommand cmd = new SqlCommand("sp_GetAllEventsFromCursusId", Connection);
+            cmd.CommandType = CommandType.StoredProcedure;
+
+            cmd.Parameters.Add("@CursusId", SqlDbType.VarChar).Value = cursusId;
+
+            SqlDataReader reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                string agendaDescription = reader.GetString(0);
+                DateTime startDate = reader.GetDateTime(1);
+                DateTime endDate = reader.GetDateTime(2);
+
+                Event evente = new Event(agendaDescription, startDate, endDate);
+
+                events.Add(evente);
+            }
+            reader.Close();
+
+            return events;
+        }
+
+        public void DisplayAllEventFromPerson(int personId, DateTime startDate, DateTime endDate)
+        {
+            SqlCommand command = new SqlCommand("sp_DisplayAllEventFromUserByDate", Connection);
             command.CommandType = CommandType.StoredProcedure;
 
             command.Parameters.Add(new SqlParameter("@PersonId", SqlDbType.Int)).Value = personId;
@@ -43,96 +154,49 @@ namespace WCS
             SqlDataReader reader = command.ExecuteReader();
             while (reader.Read())
             {
-                Console.Write(reader.GetString(0));
-                Console.Write("\t");
-                Console.Write(reader.GetInt32(1));
-                Console.Write("\t");
-                Console.Write(reader.GetString(2));
-                Console.Write("\t");
-                Console.Write(reader.GetDateTime(3));
-                Console.Write("\t");
-                Console.Write(reader.GetDateTime(4));
-
+                Console.Write(reader.GetString(0) + "\t" + reader.GetInt32(1) + "\t" + reader.GetString(2) + "\t" + reader.GetDateTime(3) + "\t" + reader.GetDateTime(4));
                 Console.WriteLine();
             }
             reader.Close();
+
         }
 
-        public List<AbstractPerson> GetStudentsFromCursus(string cursusName)
+        public void DisplayAllQuestsFromACursus(int cursusId)
         {
-            Cursus cursus = Database.GetInstance().GetCursusFromName(cursusName);
-            List<AbstractPerson> studentsOfASameCursus = new List<AbstractPerson>();
+            SqlCommand command = new SqlCommand("sp_DisplayAllQuestsFromACursus", Connection);
+            command.CommandType = CommandType.StoredProcedure;
 
-            SqlCommand cmd = new SqlCommand("sp_GetAllStudentsInACursus", Connection);
-            cmd.CommandType = CommandType.StoredProcedure;
+            command.Parameters.Add(new SqlParameter("@CursusId", SqlDbType.Int)).Value = cursusId;
+            
 
-            cmd.Parameters.Add("@CursusName", SqlDbType.VarChar).Value = cursusName;
+            Console.WriteLine("Quest id \t quest name \t quest text \t expedition name");
 
-            SqlDataReader reader = cmd.ExecuteReader();
+            SqlDataReader reader = command.ExecuteReader();
             while (reader.Read())
             {
-                int personId = reader.GetInt32(0);
-                string firstName = reader.GetString(1);
-                string lastName = reader.GetString(2);
-                DateTime birthday = reader.GetDateTime(3);
-                string email = reader.GetString(4);
-                reader.Close();
-
-                Adress adress = Database.GetInstance().GetAdressFromPersonId(personId);
-                Agenda agenda = Database.GetInstance().GetAgendaFromPersonId(personId);
-
-                AbstractPerson student = PersonFactory.Create(personId, firstName, lastName, birthday, adress, email, agenda);
-                studentsOfASameCursus.Add(student);
-                reader.Read();
-            }
-            reader.Close();
-            return studentsOfASameCursus;
-        }
-
-        public Cursus GetCursusFromName(string cursusName)
-        {
-            DateTime startDate = DateTime.Now;
-            DateTime endDate = DateTime.Now;
-            List<Expedition> expeditions = new List<Expedition>();
-            Calendar calendar;
-
-            Cursus cursus;
-
-            SqlCommand cmd = new SqlCommand("sp_GetCursus", Connection);
-            cmd.CommandType = CommandType.StoredProcedure;
-
-            cmd.Parameters.Add("@CursusName", SqlDbType.VarChar).Value = cursusName;
-
-            SqlDataReader reader = cmd.ExecuteReader();
-            while (reader.Read())
-            {
-                startDate = reader.GetDateTime(0);
-                endDate = reader.GetDateTime(1);
+                Console.Write(reader.GetInt32(0) + "\t" + reader.GetString(1) + "\t" + reader.GetString(2) + "\t" + reader.GetString(3));
+                Console.WriteLine();
+                    
             }
             reader.Close();
 
-            expeditions = Database.GetInstance().GetExpeditionFromCursus(cursusName);
-            calendar = Database.GetInstance().GetCalendarFromCursusName(cursusName);
-            cursus = new Cursus(calendar, cursusName, startDate, endDate, expeditions);
-
-            return cursus;
         }
 
-        public List<Quest> GetQuestFromCursus(string cursusName)
+        public List<Quest> GetAllQuestsFromCursusId(int cursusId)
         {
             List<Quest> quests = new List<Quest>();
-            SqlCommand cmd = new SqlCommand("sp_GetQuestForACursus", Connection);
-            cmd.CommandType = CommandType.StoredProcedure;
 
-            cmd.Parameters.Add("@CursusName", SqlDbType.VarChar).Value = cursusName;
+            SqlCommand command = new SqlCommand("sp_GetAllQuestsFromACursus", Connection);
+            command.CommandType = CommandType.StoredProcedure;
 
-            SqlDataReader reader = cmd.ExecuteReader();
+            command.Parameters.Add(new SqlParameter("@CursusId", SqlDbType.Int)).Value = cursusId;
+
+            SqlDataReader reader = command.ExecuteReader();
             while (reader.Read())
             {
-                string questName = reader.GetString(1);
-                string questText = reader.GetString(2);
-                Quest quest = new Quest(questName, questText);
-
+                string title = reader.GetString(0);
+                string text = reader.GetString(1);
+                Quest quest = new Quest(title, text);
                 quests.Add(quest);
             }
             reader.Close();
@@ -140,25 +204,28 @@ namespace WCS
             return quests;
         }
 
-        public List<Expedition> GetExpeditionFromCursus(string cursusName)
+        public List<Expedition> GetAllExpeditionsFromCursusId(int cursusId)
         {
             List<Expedition> expeditions = new List<Expedition>();
-            SqlCommand cmd = new SqlCommand("sp_GetExpeditionsForACursus", Connection);
-            cmd.CommandType = CommandType.StoredProcedure;
-
-            cmd.Parameters.Add("@CursusName", SqlDbType.VarChar).Value = cursusName;
-
             List<int> expeditionsId = new List<int>();
             List<string> expeditionsName = new List<string>();
-            SqlDataReader reader = cmd.ExecuteReader();
+
+            SqlCommand command = new SqlCommand("sp_GetAllExpeditionsFromACursus", Connection);
+            command.CommandType = CommandType.StoredProcedure;
+
+            command.Parameters.Add(new SqlParameter("@CursusId", SqlDbType.Int)).Value = cursusId;
+
+            SqlDataReader reader = command.ExecuteReader();
             while (reader.Read())
             {
+
                 int expeditionId = reader.GetInt32(0);
                 string expeditionName = reader.GetString(1);
 
                 expeditionsId.Add(expeditionId);
                 expeditionsName.Add(expeditionName);
             }
+
             reader.Close();
 
             List<Quest> quests = new List<Quest>();
@@ -193,110 +260,5 @@ namespace WCS
             return quests;
         }
 
-
-        public List<Agenda> GetAgendaFromCursusName(string cursusName)
-        {
-            List<Event> events = new List<Event>();
-            List<Agenda> agendas = new List<Agenda>();
-
-            SqlCommand cmd = new SqlCommand("sp_GetAgendaForACursusFromCursusName", Connection);
-            cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.Add("@CursusName", SqlDbType.VarChar).Value = cursusName;
-
-            SqlDataReader reader = cmd.ExecuteReader();
-            while (reader.Read())
-            {
-                string description = reader.GetString(0);
-                DateTime startDate = reader.GetDateTime(1);
-                DateTime endDate = reader.GetDateTime(2);
-                Event evente = new Event(description, startDate, endDate);
-
-                events.Add(evente);
-                Agenda agenda = new Agenda(events);
-                agendas.Add(agenda);
-            }
-            reader.Close();
-
-            return agendas;
-        }
-
-        public Calendar GetCalendarFromCursusName(string cursusName)
-        {
-            List<Agenda> agendas = new List<Agenda>();
-            agendas = Database.GetInstance().GetAgendaFromCursusName(cursusName);
-
-
-            SqlCommand cmd = new SqlCommand("sp_GetCalendarForACursus", Connection);
-            cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.Add("@CursusName", SqlDbType.VarChar).Value = cursusName;
-
-            string calendarName = "";
-            string calendarDescription = "";
-            SqlDataReader reader = cmd.ExecuteReader();
-            while (reader.Read())
-            {
-                calendarName = reader.GetString(0);
-                calendarDescription = reader.GetString(1);
-            }
-            reader.Close();
-
-            Calendar calendar = new Calendar(agendas, calendarName, calendarDescription);
-
-            return calendar;
-        }
-
-        public Adress GetAdressFromPersonId(int personId)
-        {
-            int adressId = 0;
-            int streetNumber = 0;
-            string streetName = "";
-            string cityName = "";
-            string country = "";
-            SqlCommand cmd = new SqlCommand("sp_GetPersonAdressFromId", Connection);
-            cmd.CommandType = CommandType.StoredProcedure;
-
-            cmd.Parameters.Add("@PersonId", SqlDbType.VarChar).Value = personId;
-
-            SqlDataReader reader = cmd.ExecuteReader();
-            while (reader.Read())
-            {
-                adressId = reader.GetInt32(0);
-                streetNumber = reader.GetInt32(1);
-                streetName = reader.GetString(2);
-                cityName = reader.GetString(3);
-                country = reader.GetString(4);
-
-                Adress adress = new Adress(streetNumber, streetName, cityName, country);
-                return adress;
-            }
-            reader.Close();
-
-            throw new ArgumentException("No adress recorded for this person id " + personId);
-        }
-
-        public Agenda GetAgendaFromPersonId(int personId)
-        {
-            List<Event> events = new List<Event>();
-
-            SqlCommand cmd = new SqlCommand("sp_GetPersonAgendaFromPersonId", Connection);
-            cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.Add("@PersonId", SqlDbType.VarChar).Value = personId;
-            
-            SqlDataReader reader = cmd.ExecuteReader();
-            while (reader.Read())
-            {
-                string description = reader.GetString(1);
-                DateTime startDate = reader.GetDateTime(2);
-                DateTime endDate = reader.GetDateTime(3);
-                Event evente = new Event(description, startDate, endDate);
-
-                events.Add(evente);
-            }
-            reader.Close();
-
-            Agenda agenda = new Agenda(events);
-
-            return agenda;
-        }
     }
 }

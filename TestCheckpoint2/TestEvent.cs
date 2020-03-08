@@ -30,8 +30,8 @@ namespace WCSTest
 		[Test]
 		public void TestGetCursusFromName()
 		{
-			string cursusName = "Cursus 1";
-			Cursus cursus = Database.GetInstance().GetCursusFromName(cursusName);
+			int cursusId = 1;
+			Cursus cursus = Database.GetInstance().GetCursusFromId(cursusId);
 
 			Assert.AreEqual(cursus.StartDate, DateTime.ParseExact("20191208", "yyyyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.None));
 		}

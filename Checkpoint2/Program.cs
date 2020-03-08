@@ -26,16 +26,26 @@ namespace WCS
         [Verb("quests", HelpText = "Get all quests from a Cursus")]
         class QuestFromCursus
         {
-            [Option('n', "cursusName", Required = true, HelpText = "Name of the cursus (Cursus 1)")]
-            public string cursusName { get; set; }
+            [Option('n', "cursusId", Required = true, HelpText = "Id of the cursus")]
+            public int CursusId { get; set; }
         }
+
+        [Verb("students", HelpText = "Get all students from a Cursus")]
+        class StudentsFromCursus
+        {
+            [Option('n', "cursusId", Required = true, HelpText = "Id of the cursus")]
+            public int CursusId { get; set; }
+        }
+
 
         public static void Main(string[] args)
         {
-            Parser.Default.ParseArguments<EventFromPersonOptions, QuestFromCursus>(args)
+            Parser.Default.ParseArguments<EventFromPersonOptions, QuestFromCursus, StudentsFromCursus>(args)
                             .WithParsed<EventFromPersonOptions>(RunEventFromPersonOption)
-                            .WithParsed<QuestFromCursus>(RunQuestFromCursus);
+                            .WithParsed<QuestFromCursus>(RunQuestFromCursus)
+                            .WithParsed<StudentsFromCursus>(RunStudentsFromCursus);
 
+            //Database.GetInstance().DisplayAllQuestsFromACursus(1);
 
             /*Event newEvent = new Event("Important meeting", DateTime.Now, DateTime.Now);
             newEvent.StartTime = DateTime.Now;
@@ -82,12 +92,12 @@ namespace WCS
         {
             DateTime startDate = DateTime.ParseExact(options.StartDate, "yyyyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.None);
             DateTime endDate = DateTime.ParseExact(options.EndDate, "yyyyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.None);
-            Database.GetInstance().GetEventFromPerson(options.PersonId, startDate, endDate);
+            Database.GetInstance().DisplayAllEventFromPerson(options.PersonId, startDate, endDate);
         }
 
         static void RunQuestFromCursus(QuestFromCursus options)
         {
-            List<Quest> quests = Database.GetInstance().GetQuestFromCursus(options.cursusName);
+            List<Quest> quests = Database.GetInstance().GetAllQuestsFromCursusId(options.CursusId);
 
             Console.Write("Quest title \t Quest text");
             foreach (Quest quest in quests)
@@ -95,6 +105,18 @@ namespace WCS
                 Console.WriteLine();
                 Console.Write(quest.Title + "\t");
                 Console.Write(quest.Text);
+            }
+        }
+
+        static void RunStudentsFromCursus(StudentsFromCursus options)
+        {
+            List<AbstractPerson> students = Database.GetInstance().DisplayAllStudentsFromACursusId(options.CursusId);
+
+            Console.WriteLine("FirstName \t LastName \t Birthday \t email");
+            foreach(AbstractPerson student in students)
+            {
+                Console.Write(student.FirstName + "\t" + student.LastName + "\t" + student.Birthday + "\t" + student.Email);
+                Console.WriteLine();
             }
         }
     }
