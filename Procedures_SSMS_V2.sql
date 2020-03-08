@@ -155,3 +155,5 @@ CREATE PROCEDURE sp_GetQuestsFromExpeditionId
 	WHERE Expeditions.id = @ExpeditionId
 	RETURN 
 	GO
+
+SELECT * FROM Cursus

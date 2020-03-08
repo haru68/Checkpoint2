@@ -208,5 +208,5 @@ CREATE PROCEDURE sp_GetQuestsFromExpeditionId
 	RETURN 
 	GO
 
-
+SELECT * FROM Person
 SELECT * FROM Cursus WHERE Cursus.Name = 'Cursus 1'
