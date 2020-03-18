@@ -2,6 +2,7 @@ using NUnit.Framework;
 using System;
 using WCS;
 using System.Globalization;
+using System.Collections.Generic;
 
 namespace WCSTest
 {
@@ -22,18 +23,11 @@ namespace WCSTest
 			Assert.AreEqual(startDateBeforePostpone, newEvent.StartTime - TimeSpan.FromDays(1));
 			Assert.AreEqual(endDateBeforePostpone, newEvent.EndTime - TimeSpan.FromDays(1));
 		}
+
+		
 	}
 
-	[TestFixture]
-	public class TestDatabase
-	{
-		[Test]
-		public void TestGetCursusFromName()
-		{
-			int cursusId = 1;
-			Cursus cursus = Database.GetInstance().GetCursusFromId(cursusId);
+	
 
-			Assert.AreEqual(cursus.StartDate, DateTime.ParseExact("20191208", "yyyyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.None));
-		}
-	}
+	
 }

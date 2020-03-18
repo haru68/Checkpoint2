@@ -12,17 +12,10 @@ namespace WCS
         public DateTime Birthday { get; protected set; }
         public Adress LivingLocation { get; protected set; }
         public string Email { get; protected set; }
+        public List<AbstractPerson> Subordinates { get; set; }
+        public Boolean IsLead { get; set; }
 
 
-        public AbstractPerson(int personId, string firstName, string lastName, DateTime birthday, Adress adress, string email)
-        {
-            PersonId = personId;
-            FirstName = firstName;
-            LastName = lastName;
-            Birthday = birthday;
-            LivingLocation = adress;
-            Email = email;
-        }
-        
+
     }
 }

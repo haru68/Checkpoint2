@@ -20,6 +20,7 @@ namespace WCS
             Connection.Open();
         }
 
+
         public static Database GetInstance()
         {
             if (singleton == null)
@@ -56,7 +57,8 @@ namespace WCS
 
 
                 Adress adress = new Adress(streetNumber, streetName, city, country);
-                AbstractPerson person = PersonFactory.Create(personId, personFirstName, personLastName, personBirthday, adress, personEmail, cursus);
+                AbstractPerson person = PersonFactory.Create();
+                // set Person properties independently
                 studentsOfASameCursus.Add(person);
             }
             reader.Close();
